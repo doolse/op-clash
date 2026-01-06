@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clash Game</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: #1a1a2e;
+      font-family: Arial, sans-serif;
+    }
+    #game-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+    #game-canvas {
+      border: 3px solid #4a4a6a;
+      border-radius: 8px;
+    }
+    #bottom-ui {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: center;
+      width: 800px;
+    }
+    #card-rows {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .card-row {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+    }
+    .card-row-label {
+      color: #888;
+      font-size: 11px;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+      text-align: center;
+    }
+    #elixir-bar {
+      width: 100%;
+      height: 30px;
+      background: #2a2a4a;
+      border-radius: 15px;
+      overflow: hidden;
+      position: relative;
+    }
+    #elixir-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #ff6b9d, #c44569);
+      transition: width 0.1s;
+    }
+    #elixir-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      font-weight: bold;
+      text-shadow: 1px 1px 2px black;
+    }
+    .card {
+      width: 60px;
+      height: 75px;
+      background: linear-gradient(180deg, #3a3a5a, #2a2a4a);
+      border: 2px solid #5a5a7a;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+      position: relative;
+    }
+    .card:hover {
+      transform: translateY(-3px);
+      border-color: #7a7a9a;
+    }
+    .card.selected {
+      border-color: #ffd700;
+      box-shadow: 0 0 12px rgba(255, 215, 0, 0.5);
+      transform: translateY(-5px);
+    }
+    .card.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .card.spell {
+      background: linear-gradient(180deg, #4a3a5a, #3a2a4a);
+    }
+    .card-icon {
+      font-size: 22px;
+      margin-bottom: 2px;
+    }
+    .card-name {
+      font-size: 8px;
+      color: #ccc;
+      text-transform: uppercase;
+    }
+    .card-cost {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      width: 20px;
+      height: 20px;
+      background: linear-gradient(180deg, #ff6b9d, #c44569);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: bold;
+      color: white;
+      border: 2px solid #1a1a2e;
+    }
+    .hotkey {
+      font-size: 8px;
+      color: #666;
+      position: absolute;
+      bottom: 2px;
+    }
+    #info {
+      color: #888;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div id="game-container">
+    <canvas id="game-canvas" width="800" height="600"></canvas>
+    <div id="bottom-ui">
+      <div id="card-rows">
+        <div class="card-row">
+          <div class="card selected" data-card="minipekka">
+            <span class="card-cost">4</span>
+            <span class="card-icon">🤖</span>
+            <span class="card-name">M.Pekka</span>
+            <span class="hotkey">2</span>
+          </div>
+          <div class="card" data-card="magicarcher">
+            <span class="card-cost">3</span>
+            <span class="card-icon">🏹</span>
+            <span class="card-name">M.Archer</span>
+            <span class="hotkey">3</span>
+          </div>
+          <div class="card" data-card="goldknight">
+            <span class="card-cost">4</span>
+            <span class="card-icon">👑</span>
+            <span class="card-name">G.Knight</span>
+            <span class="hotkey">4</span>
+          </div>
+          <div class="card" data-card="megaknight">
+            <span class="card-cost">7</span>
+            <span class="card-icon">⚔️</span>
+            <span class="card-name">M.Knight</span>
+            <span class="hotkey">5</span>
+          </div>
+          <div class="card spell" data-card="rage">
+            <span class="card-cost">1</span>
+            <span class="card-icon">😤</span>
+            <span class="card-name">Rage</span>
+            <span class="hotkey">6</span>
+          </div>
+          <div class="card spell" data-card="fireball">
+            <span class="card-cost">1</span>
+            <span class="card-icon">🔥</span>
+            <span class="card-name">Fireball</span>
+            <span class="hotkey">7</span>
+          </div>
+          <div class="card spell" data-card="freeze">
+            <span class="card-cost">1</span>
+            <span class="card-icon">❄️</span>
+            <span class="card-name">Freeze</span>
+            <span class="hotkey">8</span>
+          </div>
+          <div class="card spell" data-card="poison">
+            <span class="card-cost">1</span>
+            <span class="card-icon">☠️</span>
+            <span class="card-name">Poison</span>
+            <span class="hotkey">9</span>
+          </div>
+          <div class="card" data-card="tesla">
+            <span class="card-cost">5</span>
+            <span class="card-icon">🚗</span>
+            <span class="card-name">Tesla</span>
+            <span class="hotkey">0</span>
+          </div>
+          <div class="card" data-card="surge">
+            <span class="card-cost">1</span>
+            <span class="card-icon">⚡</span>
+            <span class="card-name">Surge</span>
+            <span class="hotkey">-</span>
+          </div>
+          <div class="card" data-card="lily">
+            <span class="card-cost">1</span>
+            <span class="card-icon">🌸</span>
+            <span class="card-name">Lily</span>
+            <span class="hotkey">=</span>
+          </div>
+        </div>
+      </div>
+      <div id="elixir-bar">
+        <div id="elixir-fill" style="width: 50%"></div>
+        <div id="elixir-text">5 / 10</div>
+      </div>
+    </div>
+    <div id="info">W=WIN | L=HORDE | K=ASSAULT | S=SUDDEN DEATH | P=PAUSE | M=PEKKAS | N=ENEMY PEKKAS | T=LOADED TESLA</div>
+  </div>
+  <script src="dist/bundle.js"></script>
+</body>
+</html>

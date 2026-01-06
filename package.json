@@ -1,0 +1,14 @@
+{
+  "name": "clash-game",
+  "version": "1.0.0",
+  "description": "Clash Royale-like browser game",
+  "scripts": {
+    "build": "esbuild src/index.ts --bundle --outfile=dist/bundle.js",
+    "dev": "esbuild src/index.ts --bundle --outfile=dist/bundle.js --watch --servedir=.",
+    "start": "npm run dev"
+  },
+  "devDependencies": {
+    "esbuild": "^0.19.0",
+    "typescript": "^5.3.0"
+  }
+}
